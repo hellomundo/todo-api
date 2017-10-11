@@ -18,7 +18,7 @@ app.post('/todos', (req, res) => {
     todo.save().then((doc) => {
         res.send(doc)
     }, (err) => {
-        console.log('error: ', err)
+        //console.log('error: ', err)
         res.status(400).send(err)
     }) 
 })
@@ -27,7 +27,7 @@ app.get('/todos', (req, res) => {
     Todo.find().then((todos) => {
         res.status(200).send({todos})
     }).catch((err) => {
-        console.log('error: ', err)
+        //console.log('error: ', err)
         res.status(400).send(err)
     })
 })
