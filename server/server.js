@@ -20,8 +20,16 @@ app.post('/todos', (req, res) => {
     }, (err) => {
         console.log('error: ', err)
         res.status(400).send(err)
+    }) 
+})
+
+app.get('/todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.status(200).send({todos})
+    }).catch((err) => {
+        console.log('error: ', err)
+        res.status(400).send(err)
     })
-    
 })
 
 app.listen(2000, () => {
