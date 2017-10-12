@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+//const {ObjectId} = require('mongodb')
 
 const {mongoose} = require('./db/mongoose.js')
 const {Todo} = require('./models/todo.js')
@@ -28,6 +29,23 @@ app.get('/todos', (req, res) => {
         res.status(200).send({todos})
     }).catch((err) => {
         //console.log('error: ', err)
+        res.status(400).send(err)
+    })
+})
+
+app.get('/todos/:id', (req, res) => {
+    let id = req.params.id
+
+    if(!mongoose.Types.ObjectId.isValid(id)){
+        return res.status(404).send()
+    }
+
+    Todo.findById({_id: id}).then((todo) => {
+        if(!todo) {
+            return res.status(404).send()
+        }
+        res.status(200).send({todo})
+    }).catch((err) => {
         res.status(400).send(err)
     })
 })
