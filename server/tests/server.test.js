@@ -7,10 +7,13 @@ const {Todo} = require('./../models/todo')
 
 const todos = [{
     _id: new ObjectId(),
-    text: 'First test todo'
+    text: 'First test todo',
+    completed: false
 }, {
     _id: new ObjectId(),
-    text: 'Second test todo'
+    text: 'Second test todo',
+    completed: true,
+    completedAt: 333
 }]
 
 beforeEach((done) => {
@@ -140,6 +143,44 @@ describe('DELETE /todos/:item', () => {
         request(app)
             .delete('/todos/12345')
             .expect(404)
+            .end(done)
+    })
+})
+
+describe('PATCH /todos/:id', () => {
+    it('should set completedAt when completed is true', (done) => {
+        let id = todos[0]._id.toHexString()
+        let text = "I like bananas"
+        let body = { 
+            text: text,
+            completed: true 
+        }
+        request(app)
+            .patch('/todos/'+id)
+            .send(body)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).to.equal(text)
+                expect(res.body.todo.completed).to.equal(true)
+                expect(res.body.todo.completedAt).to.be.a('number')
+            })
+            .end(done)
+        
+    })
+
+    it('should clear completedAt when completed is false', (done) => {
+        let id = todos[1]._id.toHexString()
+        let body = { 
+            completed: false 
+        }
+       request(app)
+            .patch('/todos/'+id)
+            .send(body)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.completed).to.equal(false)
+                expect(res.body.todo.completedAt).to.equal(null)
+            })
             .end(done)
     })
 })

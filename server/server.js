@@ -74,12 +74,14 @@ app.delete('/todos/:id', (req, res) => {
 app.patch('/todos/:id', (req, res) => {
     let id = req.params.id
 
+    // limit the properties the user can update
     var body = _.pick(req.body, ['text','completed'])
 
     if(!mongoose.Types.ObjectId.isValid(id)){
         return res.status(404).send()
     }
 
+    // updated the completedAt property if completed is true
     if(_.isBoolean(body.completed) && body.completed) {
         body.completedAt = new Date().getTime()
     } else {
