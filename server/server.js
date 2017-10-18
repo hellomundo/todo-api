@@ -106,9 +106,9 @@ app.patch('/todos/:id', (req, res) => {
 })
 
 // users
-
+// sign up
 app.post('/users', (req, res) => {
-    console.log(req.body);
+    console.log(req.body)
     let body = _.pick(req.body, ['email', 'password'])
     var user = new User(body)
 
@@ -120,6 +120,23 @@ app.post('/users', (req, res) => {
         console.log("err: ", err)
         res.status(400).send(err)
     })
+})
+
+// login
+
+app.post('/users/signin', (req, res) => {
+    console.log('req.body')
+    let body = _.pick(req.body, ['email', 'password'])
+    // find user by email
+    User.findByCredentials(body.email, body.password).then((user) => {
+        console.log('user: ', user)
+        return user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(user)
+        })
+    }).catch((err) => {
+        res.status(400).send()
+    })
+
 })
 
 

@@ -58,6 +58,25 @@ userSchema.methods.generateAuthToken = function() {
     })
 }
 
+userSchema.statics.findByCredentials = function(email, password) {
+    let User = this;
+    return User.findOne({email}).then((user) => {
+        if(!user) {
+            return Promise.reject('Could not find that user.')
+        }
+        
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, user.password).then((isMatching) => {
+                if(isMatching) {
+                    return resolve(user)
+                }
+                console.log('did not match')
+                return reject('Password does not match.')
+            })
+        })
+    })
+}
+
 userSchema.statics.findByToken = function(token) {
     const User = this
     var decoded
