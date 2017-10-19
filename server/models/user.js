@@ -58,21 +58,21 @@ userSchema.methods.generateAuthToken = function() {
     })
 }
 
+
 userSchema.statics.findByCredentials = function(email, password) {
     let User = this;
     return User.findOne({email}).then((user) => {
         if(!user) {
             return Promise.reject('Could not find that user.')
         }
-        
-        return new Promise((resolve, reject) => {
-            bcrypt.compare(password, user.password).then((isMatching) => {
-                if(isMatching) {
-                    return resolve(user)
-                }
-                console.log('did not match')
-                return reject('Password does not match.')
-            })
+
+        return bcrypt.compare(password, user.password).then((isMatching) => {
+            if(!isMatching) {
+                console.log('did not match')                
+                return Promise.reject('Password does not match.')
+            }
+
+            return user;
         })
     })
 }
@@ -93,6 +93,18 @@ userSchema.statics.findByToken = function(token) {
         '_id': decoded._id,
         'tokens.token': token,
         'tokens.access': 'auth'
+    })
+}
+
+userSchema.methods.removeToken = function(token) {
+    let user = this
+
+    return user.update({
+        $pull: {
+            tokens: {
+                token: token
+            }
+        }
     })
 }
 

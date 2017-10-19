@@ -224,7 +224,7 @@ describe('POST /users/', () => {
                     expect(res).to.exist
                     expect(res.password).does.not.equal(user.password)
                     done()
-                })
+                }).catch((e) => done(e))
             })
     })
 
@@ -250,5 +250,68 @@ describe('POST /users/', () => {
             .send(user)
             .expect(400)
             .end(done)
+    })
+})
+
+describe('POST /users/signin', () => {
+    it('should log in user with valid credentials and return auth token', (done) => {
+        let credentials = {
+            email: users[1].email,
+            password: users[1].password
+        }
+        request(app)
+            .post('/users/signin')
+            .send(credentials)
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).to.exist
+            })
+            .end((err, res) => {
+                if(err) {
+                    return done(err)
+                }
+
+                User.findById(users[1]._id).then((user) => {
+                    expect(user.tokens[0]).to.include({
+                        access: 'auth',
+                        token: res.headers['x-auth']
+                    })
+
+                    done()
+                }).catch((e) => done(e))
+            })
+    })
+
+    it('should reject invalid login', (done) => {
+        let credentials = {
+            email: 'bob@blah.co',
+            password: 'bac12io'
+        }
+        request(app)
+            .post('/users/signin')
+            .send(credentials)
+            .expect(400)
+            .end(done)
+            
+    })
+})
+
+describe('DELETE /users/me/token', () => {
+    it('should delete auth token from user in db', (done) => {
+        request(app)
+            .delete('/users/me/token')
+            .set('x-auth', users[0].tokens[0].token)
+            .expect(200)
+            .end((err, res) => {
+                if(err) {
+                    return done(err)
+                }
+
+                // find user in db and make sure token is gone
+                User.findById(users[0]._id).then((user) => {
+                    expect(user.tokens.length).to.equal(0)
+                    done()
+                }).catch((e) => done(e))
+            })   
     })
 })
